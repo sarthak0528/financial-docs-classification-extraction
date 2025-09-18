@@ -8,30 +8,42 @@ from config.constants import (
 )
 from sentence_transformers import SentenceTransformer
 
-# Load serialized models
 
+# Load serialized models
 def load_tfidf_and_model():
     """
     Load TF-IDF vectorizer and classification model.
     """
-    vectorizer_path = os.path.join(MODELS_PATH, VECTORIZER_FILE)
-    model_path = os.path.join(MODELS_PATH, CLASSIFICATION_MODEL_FILE)
+    try:
+        vectorizer_path = os.path.join(MODELS_PATH, VECTORIZER_FILE)
+        model_path = os.path.join(MODELS_PATH, CLASSIFICATION_MODEL_FILE)
 
-    vectorizer = joblib.load(vectorizer_path)
-    model = joblib.load(model_path)
+        vectorizer = joblib.load(vectorizer_path)
+        model = joblib.load(model_path)
 
-    return vectorizer, model
+        return vectorizer, model
+
+    except FileNotFoundError as fnf:
+        print(f"[ERROR] {fnf}")
+        return None, None
+    except Exception as e:
+        print(f"[ERROR] Unexpected issue while loading TF-IDF/model: {e}")
+        return None, None
+
 
 # Load embedding model
-
 def load_embedding_model():
     """
     Load sentence transformer for embeddings.
     """
-    return SentenceTransformer(EMBEDDING_MODEL_NAME)
+    try:
+        return SentenceTransformer(EMBEDDING_MODEL_NAME)
+    except Exception as e:
+        print(f"[ERROR] Unexpected issue while loading embedding model: {e}")
+        return None
+
 
 # One-time loads
-
 try:
     VECTORIZER, CLASSIFICATION_MODEL = load_tfidf_and_model()
 except Exception as e:
